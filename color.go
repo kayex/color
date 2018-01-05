@@ -31,11 +31,12 @@ func C(v int) (Color, error) {
 	return Color(v), nil
 }
 
-// Hex is a color represented as a hexadecimal string, prefixed with
-// a single # sign.
+// Hex is a color represented as a hexadecimal string with a #-sign prefixed,
+// for example #ff0023.
 //
-// Hex only represents full hexadecimal color triplets (i.e. not colors on the
-// shorthand hexadecimal form).
+// Hex only represents full hexadecimal color triplets. This means colors on the
+// shorthand hexadecimal form need to be converted to the full format before
+// being used as Hex.
 type Hex string
 
 func (h *Hex) Color() Color {
