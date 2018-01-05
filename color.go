@@ -81,9 +81,8 @@ func (rgb RGBColor) String() string {
 // RGBA is an RGBColor color with an additional alpha (transparency) channel.
 type RGBA struct {
 	RGBColor
-	// a is the color alpha channel between 0.0 and 1.0, where
-	// 0.0 is completely transparent
-	// 1.0 is completely opaque
+	// a is the color alpha channel. It assumes values between 0.0 and 1.0
+	// where 0.0 represents complete transparency.
 	a float32
 }
 
