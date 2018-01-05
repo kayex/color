@@ -30,27 +30,31 @@ func TestColor_String(t *testing.T) {
 	}
 }
 
-func TestHex_Color(t *testing.T) {
+func TestHex(t *testing.T) {
 	cases := []struct{
-		c Hex
+		c   string
 		exp Color
 	}{
 		{
-			c: Hex("#ffffff"),
+			c:   "#ffffff",
 			exp: CMax,
 		},
 		{
-			c: Hex("#000000"),
+			c:   "#000000",
 			exp: CMin,
 		},
 		{
-			c: Hex("#101010"),
+			c:   "#101010",
 			exp: Color(0x101010),
 		},
 	}
 
 	for _, c := range cases {
-		act := c.c.Color()
+		act, err := Hex(c.c)
+
+		if err != nil {
+			t.Errorf("Expected Hex(%q) to be %v, error given: %v", c.c, c.exp, err)
+		}
 
 		if act != c.exp {
 			t.Errorf("Expected %v.Color() to be %v, %v given", c.c, c.exp, act)
@@ -60,19 +64,19 @@ func TestHex_Color(t *testing.T) {
 
 func TestRGB_Color(t *testing.T) {
 	cases := []struct{
-		c RGB
+		c   RGBColor
 		exp Color
 	}{
 		{
-			c: RGB{255, 255, 255},
+			c:   RGBColor{255, 255, 255},
 			exp: CMax,
 		},
 		{
-			c: RGB{0, 0, 0},
+			c:   RGBColor{0, 0, 0},
 			exp: CMin,
 		},
 		{
-			c: RGB{16, 16, 16},
+			c:   RGBColor{16, 16, 16},
 			exp: Color(0x101010),
 		},
 	}
