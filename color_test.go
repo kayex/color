@@ -36,15 +36,15 @@ func TestHex_Color(t *testing.T) {
 		exp Color
 	}{
 		{
-			c: Hex{"#ffffff"},
+			c: Hex("#ffffff"),
 			exp: CMax,
 		},
 		{
-			c: Hex{"#000000"},
+			c: Hex("#000000"),
 			exp: CMin,
 		},
 		{
-			c: Hex{"#101010"},
+			c: Hex("#101010"),
 			exp: Color(0x101010),
 		},
 	}

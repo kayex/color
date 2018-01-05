@@ -9,6 +9,12 @@ import (
 // Color is a HTML color represented as single int value.
 type Color uint
 
+// CMin is the lowest color value.
+const CMin Color = 0x0
+
+// CMax is the highest color value.
+const CMax Color = 0xffffff
+
 func (c Color) String() string {
 	return c.Hex().String()
 }
@@ -25,40 +31,32 @@ func C(v int) (Color, error) {
 	return Color(v), nil
 }
 
-// CMin is the lowest color value.
-const CMin Color = 0x0
-
-// CMax is the highest color value.
-const CMax Color = 0xffffff
-
 // Hex is a color represented as a hexadecimal string, prefixed with
 // a single # sign.
 //
 // Hex only represents full hexadecimal color triplets (i.e. not colors on the
 // shorthand hexadecimal form).
-type Hex struct {
-	// v is the hexadecimal color string.
-	v string
-}
+type Hex string
 
 func (h *Hex) Color() Color {
-	v := strings.TrimPrefix(h.v, "#")
+	v := strings.TrimPrefix(h.String(), "#")
 	c, err := strconv.ParseInt(v, 16, 32)
 	if err != nil {
 		panic(err)
 	}
+
 	return Color(c)
 }
 
 func (h Hex) String() string {
-	return fmt.Sprintf("#%s", h.v)
+	return string(h)
 }
 
 func (c Color) Hex() Hex {
 	rgb := c.RGB()
-	h := fmt.Sprintf("%02x%02x%02x", uint8(rgb.r), rgb.g, rgb.g)
+	h := fmt.Sprintf("#%02x%02x%02x", rgb.r, rgb.g, rgb.g)
 
-	return Hex{h}
+	return Hex(h)
 }
 
 func (c Color) RGB() RGB {
@@ -66,18 +64,19 @@ func (c Color) RGB() RGB {
 	g := (c >> 8) & 255
 	b := c & 255
 
-	return RGB{uint(r), uint(g), uint(b)}
+	return RGB{uint8(r), uint8(g), uint8(b)}
 }
 
 // RGB is a color consisting of three 8 bit channels; red, green, and blue.
 type RGB struct {
-	r uint
-	g uint
-	b uint
+	r uint8
+	g uint8
+	b uint8
 }
 
 func (rgb *RGB) Color() Color {
-	v := (rgb.r << 16) | (rgb.g << 8) | rgb.b
+	// Cast to uint to allow left shifting the red and green values.
+	v := (uint(rgb.r) << 16) | (uint(rgb.g) << 8) | uint(rgb.b)
 
 	return Color(v)
 }
