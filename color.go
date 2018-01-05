@@ -19,18 +19,6 @@ func (c Color) String() string {
 	return c.Hex().String()
 }
 
-func C(v int) (Color, error) {
-	if v > int(CMax) {
-		return 0, fmt.Errorf("%x exceeds color max value (%x)", v, CMax)
-	}
-
-	if v < int(CMin) {
-		return 0, fmt.Errorf("invalid color value %x, color value must be positive", v)
-	}
-
-	return Color(v), nil
-}
-
 // HexColor is a color represented as a hexadecimal string with a #-sign prefixed,
 // for example #ff0023.
 //
