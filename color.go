@@ -76,7 +76,7 @@ type RGB struct {
 }
 
 func (rgb *RGB) Color() Color {
-	// Cast to uint to allow left shifting the red and green values.
+	// Cast to full-size uint to allow left shifting the red and green values.
 	v := (uint(rgb.r) << 16) | (uint(rgb.g) << 8) | uint(rgb.b)
 
 	return Color(v)
