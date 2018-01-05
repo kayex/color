@@ -16,7 +16,7 @@ func TestColor_String(t *testing.T) {
 			exp: "#000000",
 		},
 		{
-			c: Color(1052688),
+			c: Color(0x101010),
 			exp: "#101010",
 		},
 	}
@@ -45,7 +45,7 @@ func TestHex_Color(t *testing.T) {
 		},
 		{
 			c: Hex{"#101010"},
-			exp: Color(1052688),
+			exp: Color(0x101010),
 		},
 	}
 
@@ -73,7 +73,7 @@ func TestRGB_Color(t *testing.T) {
 		},
 		{
 			c: RGB{16, 16, 16},
-			exp: Color(1052688),
+			exp: Color(0x101010),
 		},
 	}
 
