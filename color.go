@@ -19,12 +19,12 @@ func (c Color) String() string {
 	return c.Hex().String()
 }
 
-// HexColor is a color represented as a hexadecimal string with a #-sign prefixed,
-// for example #ff0023.
+// HexColor is a Color represented as a hexadecimal string, with a
+// #-sign prefixed.
 //
-// HexColor only represents full hexadecimal color triplets. This means colors on the
-// shorthand hexadecimal form need to be converted to the full format before
-// being used as HexColor.
+// HexColor only represents full hexadecimal color triplets. Colors on
+// the shorthand hexadecimal form need to be converted to the full format
+// before being used as HexColor.
 type HexColor string
 
 func Hex(s string) (Color, error) {
