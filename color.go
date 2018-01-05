@@ -94,7 +94,3 @@ type RGBA struct {
 	a float32
 }
 
-type Format interface {
-	Color() int
-}
-
