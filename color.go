@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"strconv"
+	"bytes"
 )
 
 // Color is a 24 bit sRGB web color.
@@ -21,20 +22,64 @@ func (c Color) String() string {
 
 // HexColor is a Color represented as a hexadecimal string, with a
 // #-sign prefixed.
-//
-// HexColor only represents full hexadecimal color triplets. Colors on
-// the shorthand hexadecimal form need to be converted to the full format
-// before being used as HexColor.
 type HexColor string
 
 func Hex(s string) (Color, error) {
-	v := strings.TrimPrefix(s, "#")
-	c, err := strconv.ParseInt(v, 16, 32)
+	h := strings.TrimPrefix(s, "#")
+
+	if !validHex(h) {
+		return 0, fmt.Errorf("invalid hex value %q", h)
+	}
+
+	// Here, we can safely assume that v is in the ASCII range (since it
+	// passed validHex()) and index byte-wise.
+	hl := len(h)
+
+	switch hl {
+	case 6:
+	case 3:
+		h = convertShortHex(h)
+	default:
+		return 0, fmt.Errorf("invalid hex format %q, hex colors should be either 3 or 6 characters long", h)
+	}
+
+	v, err := strconv.ParseInt(h, 16, 32)
 	if err != nil {
 		return 0, err
 	}
+	c := Color(v)
 
-	return Color(c), nil
+	if c < CMin || c > CMax {
+		return 0, fmt.Errorf("invalid color value %q, values should be between %x and %x", h, CMin, CMax)
+	}
+
+	return c, nil
+}
+
+// convertShortHex converts color values on the shorthand hexadecimal format
+// to the full 6 character format.
+//
+// For example: #fff -> #ffffff
+// 				#abc -> #aabbcc
+func convertShortHex(hex string) string {
+	var b bytes.Buffer
+
+	b.WriteByte(hex[0])
+	b.WriteByte(hex[0])
+	b.WriteByte(hex[1])
+	b.WriteByte(hex[1])
+	b.WriteByte(hex[2])
+	b.WriteByte(hex[2])
+
+	return b.String()
+}
+
+func validHex(hex string) bool {
+	invalidChar := strings.IndexFunc(hex, func(r rune) bool {
+		return !('0' <= r && r <= 'f')
+	})
+
+	return invalidChar == -1
 }
 
 func (h HexColor) String() string {

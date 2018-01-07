@@ -34,6 +34,8 @@ func TestHex(t *testing.T) {
 	cases := []struct{
 		c   string
 		exp Color
+		err bool
+		desc string
 	}{
 		{
 			c:   "#ffffff",
@@ -44,16 +46,40 @@ func TestHex(t *testing.T) {
 			exp: CMin,
 		},
 		{
+			c: "#000",
+			exp: CMin,
+
+		},
+		{
+			c: "#fff",
+			exp: CMax,
+
+		},
+		{
 			c:   "#101010",
 			exp: Color(0x101010),
+		},
+		{
+			c: "#1000000",
+			err: true,
+			desc: "color value exceeds CMax",
+		},
+		{
+			c: "#aaff",
+			err: true,
+			desc: "invalid color format",
 		},
 	}
 
 	for _, c := range cases {
 		act, err := Hex(c.c)
 
-		if err != nil {
+		if err != nil && !c.err {
 			t.Errorf("Expected Hex(%q) to be %v, error given: %v", c.c, c.exp, err)
+			continue
+		} else if err == nil && c.err {
+			t.Errorf("Expected Hex(%q) to return error: %v", c.c, c.desc)
+			continue
 		}
 
 		if act != c.exp {
