@@ -10,10 +10,10 @@ import (
 // Color is a 24 bit sRGB web color.
 type Color uint
 
-// CMin is the lowest color value.
+// CMin is the lowest possible color value.
 const CMin Color = 0x0
 
-// CMax is the highest color value.
+// CMax is the highest possible color value.
 const CMax Color = 0xffffff
 
 func (c Color) String() string {
