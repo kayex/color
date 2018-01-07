@@ -20,13 +20,11 @@ func (c Color) String() string {
 	return c.Hex().String()
 }
 
-// HexColor is a Color represented as a hexadecimal string, with a
-// #-sign prefixed.
+// HexColor is a Color represented as a hexadecimal string.
 type HexColor string
 
 func Hex(s string) (Color, error) {
 	h := strings.TrimPrefix(s, "#")
-
 	if !validHex(h) {
 		return 0, fmt.Errorf("invalid hex value %q", h)
 	}
@@ -34,7 +32,6 @@ func Hex(s string) (Color, error) {
 	// Here, we can safely assume that v is in the ASCII range (since it
 	// passed validHex()) and index byte-wise.
 	hl := len(h)
-
 	switch hl {
 	case 6:
 	case 3:
@@ -59,8 +56,8 @@ func Hex(s string) (Color, error) {
 // convertShortHex converts color values on the shorthand hexadecimal format
 // to the full 6 character format.
 //
-// For example: #fff -> #ffffff
-//              #abc -> #aabbcc
+// For example: fff -> ffffff
+//              abc -> aabbcc
 func convertShortHex(hex string) string {
 	var b bytes.Buffer
 
@@ -74,21 +71,13 @@ func convertShortHex(hex string) string {
 	return b.String()
 }
 
-func validHex(hex string) bool {
-	invalidChar := strings.IndexFunc(hex, func(r rune) bool {
-		return !('0' <= r && r <= 'f')
-	})
-
-	return invalidChar == -1
-}
-
 func (h HexColor) String() string {
-	return string(h)
+	return string("#" + h)
 }
 
 func (c Color) Hex() HexColor {
 	rgb := c.RGB()
-	h := fmt.Sprintf("#%02x%02x%02x", rgb.r, rgb.g, rgb.g)
+	h := fmt.Sprintf("%02x%02x%02x", rgb.r, rgb.g, rgb.g)
 
 	return HexColor(h)
 }
@@ -129,5 +118,13 @@ type RGBA struct {
 	// a is the color alpha channel. It assumes values between 0.0 and 1.0
 	// where 0.0 represents complete transparency.
 	a float32
+}
+
+func validHex(hex string) bool {
+	invalidChar := strings.IndexFunc(hex, func(r rune) bool {
+		return !('0' <= r && r <= 'f')
+	})
+
+	return invalidChar == -1
 }
 
