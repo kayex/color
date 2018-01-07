@@ -60,7 +60,7 @@ func Hex(s string) (Color, error) {
 // to the full 6 character format.
 //
 // For example: #fff -> #ffffff
-//	            #abc -> #aabbcc
+//              #abc -> #aabbcc
 func convertShortHex(hex string) string {
 	var b bytes.Buffer
 
