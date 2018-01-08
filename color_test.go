@@ -3,20 +3,20 @@ package color
 import "testing"
 
 func TestColor_String(t *testing.T) {
-	cases := []struct{
-		c Color
+	cases := []struct {
+		c   Color
 		exp string
 	}{
 		{
-			c: CMax,
+			c:   CMax,
 			exp: "#ffffff",
 		},
 		{
-			c: CMin,
+			c:   CMin,
 			exp: "#000000",
 		},
 		{
-			c: Color(0x101010),
+			c:   Color(0x101010),
 			exp: "#101010",
 		},
 	}
@@ -31,10 +31,10 @@ func TestColor_String(t *testing.T) {
 }
 
 func TestHex(t *testing.T) {
-	cases := []struct{
-		c   string
-		exp Color
-		err bool
+	cases := []struct {
+		c    string
+		exp  Color
+		err  bool
 		desc string
 	}{
 		{
@@ -46,27 +46,25 @@ func TestHex(t *testing.T) {
 			exp: CMin,
 		},
 		{
-			c: "#000",
+			c:   "#000",
 			exp: CMin,
-
 		},
 		{
-			c: "#fff",
+			c:   "#fff",
 			exp: CMax,
-
 		},
 		{
 			c:   "#101010",
 			exp: Color(0x101010),
 		},
 		{
-			c: "#1000000",
-			err: true,
+			c:    "#1000000",
+			err:  true,
 			desc: "color value exceeds CMax",
 		},
 		{
-			c: "#aaff",
-			err: true,
+			c:    "#aaff",
+			err:  true,
 			desc: "invalid color format",
 		},
 	}
@@ -88,21 +86,21 @@ func TestHex(t *testing.T) {
 	}
 }
 
-func TestRGB_Color(t *testing.T) {
-	cases := []struct{
-		c   RGBColor
+func TestRGBInt_Color(t *testing.T) {
+	cases := []struct {
+		c   RGBInt
 		exp Color
 	}{
 		{
-			c:   RGBColor{255, 255, 255},
+			c:   RGBInt{255, 255, 255},
 			exp: CMax,
 		},
 		{
-			c:   RGBColor{0, 0, 0},
+			c:   RGBInt{0, 0, 0},
 			exp: CMin,
 		},
 		{
-			c:   RGBColor{16, 16, 16},
+			c:   RGBInt{16, 16, 16},
 			exp: Color(0x101010),
 		},
 	}
@@ -116,3 +114,34 @@ func TestRGB_Color(t *testing.T) {
 	}
 }
 
+func TestColor_RGBFloat(t *testing.T) {
+	cases := []struct {
+		c   Color
+		exp RGBFloat
+	}{
+		{
+			c:   CMax,
+			exp: RGBFloat{1.0, 1.0, 1.0},
+		},
+		{
+			c:   CMin,
+			exp: RGBFloat{0.0, 0.0, 0.0},
+		},
+		{
+			c:   Color(0x808080),
+			exp: RGBFloat{0.5, 0.5, 0.5},
+		},
+		{
+			c:   Color(0xaaaaaa),
+			exp: RGBFloat{0.67, 0.67, 0.67},
+		},
+	}
+
+	for _, c := range cases {
+		act := c.c.RGBFloat()
+
+		if !act.Equals(&c.exp) {
+			t.Errorf("Expected %v.Color() to be %s, %s given", c.c, c.exp, act)
+		}
+	}
+}

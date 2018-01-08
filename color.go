@@ -1,10 +1,10 @@
 package color
 
 import (
-	"fmt"
-	"strings"
-	"strconv"
 	"bytes"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
 // Color is a 24 bit sRGB web color.
@@ -15,6 +15,12 @@ const CMin Color = 0x0
 
 // CMax is the highest possible color value.
 const CMax Color = 0xffffff
+
+const (
+	OffsetR = 0x10
+	OffsetG = 0x08
+	OffsetB = 0x00
+)
 
 func (c Color) String() string {
 	return c.Hex().String()
@@ -76,48 +82,72 @@ func (h HexColor) String() string {
 }
 
 func (c Color) Hex() HexColor {
-	rgb := c.RGB()
+	rgb := c.RGBInt()
 	h := fmt.Sprintf("%02x%02x%02x", rgb.r, rgb.g, rgb.g)
 
 	return HexColor(h)
 }
 
-func (c Color) RGB() RGBColor {
-	r := (c >> 16) & 255
-	g := (c >> 8) & 255
-	b := c & 255
-
-	return RGBColor{uint8(r), uint8(g), uint8(b)}
-}
-
-// RGBColor is a color represented by three 8 bit channels; red, green, and blue.
-type RGBColor struct {
+// RGBInt is a color represented by three 8 bit channels; red, green, and blue.
+type RGBInt struct {
 	r uint8
 	g uint8
 	b uint8
 }
 
-func RGB(r, g, b uint8) RGBColor {
-	return RGBColor{r, g, b}
+func (c Color) RGBInt() RGBInt {
+	r := (c >> OffsetR) & 0xff
+	g := (c >> OffsetG) & 0xff
+	b := c & 0xff
+
+	return RGBInt{uint8(r), uint8(g), uint8(b)}
 }
 
-func (rgb *RGBColor) Color() Color {
-	// Cast to full-size uint to allow left shifting the red and green values.
-	v := (uint(rgb.r) << 16) | (uint(rgb.g) << 8) | uint(rgb.b)
+func (rgb *RGBInt) Color() Color {
+	c := consolidate(rgb.r, rgb.g, rgb.b)
 
-	return Color(v)
+	return c
 }
 
-func (rgb RGBColor) String() string {
+func (rgb RGBInt) String() string {
 	return fmt.Sprintf("rgb(%d, %d, %d)", rgb.r, rgb.g, rgb.b)
 }
 
-// RGBA is an RGBColor color with an additional alpha (transparency) channel.
-type RGBA struct {
-	RGBColor
-	// a is the color alpha channel. It assumes values between 0.0 and 1.0
-	// where 0.0 represents complete transparency.
-	a float32
+type RGBFloat struct {
+	r float32
+	g float32
+	b float32
+}
+
+func (c Color) RGBFloat() RGBFloat {
+	rgb := c.RGBInt()
+	r := float32(rgb.r) / 0xff
+	g := float32(rgb.g) / 0xff
+	b := float32(rgb.b) / 0xff
+
+	return RGBFloat{r, g, b}
+}
+
+func (rgb *RGBFloat) Color() Color {
+	c := consolidate(uint8(rgb.r), uint8(rgb.g), uint8(rgb.b))
+
+	return c
+}
+
+func (rgb *RGBFloat) Equals(o *RGBFloat) bool {
+	return colorChanEqual(rgb.r, o.r) &&
+		colorChanEqual(rgb.g, o.g) &&
+		colorChanEqual(rgb.b, o.b)
+}
+
+func (rgb RGBFloat) String() string {
+	return fmt.Sprintf("rgb(%0.2f, %0.2f, %0.2f)", rgb.r, rgb.g, rgb.b)
+}
+
+func consolidate(r, g, b uint8) Color {
+	v := (uint(r) << OffsetR) | (uint(g) << OffsetG) | uint(b)<<OffsetB
+
+	return Color(v)
 }
 
 func validHex(hex string) bool {
@@ -128,3 +158,11 @@ func validHex(hex string) bool {
 	return invalidChar == -1
 }
 
+func colorChanEqual(a, b float32) bool {
+	// p is the size of each distinct color value in 24 bit sRGB.
+	const p = 1.0 / 0xff
+
+	eq := (a-b) < p && (b-a) < p
+
+	return eq
+}
