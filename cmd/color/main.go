@@ -49,6 +49,7 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
+		fmt.Printf("> ")
 		for scanner.Scan() {
 			input := scanner.Text()
 
@@ -59,6 +60,7 @@ func main() {
 			format, err = color.Parse(input)
 			if err != nil {
 				fmt.Println(err)
+				fmt.Printf("> ")
 			} else {
 				break
 			}
