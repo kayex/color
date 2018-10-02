@@ -24,6 +24,7 @@ $ color
 > #ffee00
 ```
 
+# Color formats
 Color tries to be as accomodating as possible when parsing input. The following formats are currently supported:
 
 | Format                | Example                  |
