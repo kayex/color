@@ -1,5 +1,5 @@
-# color
-A color format conversion tool. Supports copying converted values to clipboard.
+# color 🎨
+A CSS color format conversion tool.
 
 ![Color screenshot](/screen.png?raw=true&cache=2 "Color")
 
