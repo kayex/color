@@ -1,7 +1,9 @@
-# color
-A color format conversion tool. Supports copying converted values to clipboard.
+# color 🎨
+A CSS color format conversion tool.
 
-![Color screenshot](/screen.png?raw=true "Color")
+<p align="center">
+ <img src="/screen.png?raw=true" alt="Color screenshot">
+</p>
 
 # Installation
 ```bash
@@ -9,32 +11,28 @@ go get github.com/kayex/color/cmd/color
 ```
 
 # Usage
+The color value can either be passed as the sole argument to `color`, or entered interactively after running the program without any arguments.
 
-### Color as program argument
 ```
-$ color "rgb(232, 112, 96)"
-
- Input (RGB)	rgb(232, 112, 96)
-
- [1] sRGB	15233120
- [2] Hex	#e87060
- [3] RGB	232 112 96
- [4] RGB	rgb(232, 112, 96)
- 
-Copy> 
+$ color "#ffee00"
 ```
 
-### Interactive mode
+or
+
 ```
 $ color
-> #abc
-
- Input (hex)	#aabbcc
-
- [1] sRGB	11189196
- [2] Hex	#aabbcc
- [3] RGB	170 187 204
- [4] RGB	rgb(170, 187, 204)
- 
-Copy>
+> #ffee00
 ```
+
+# Color formats
+Color tries to be as accomodating as possible when parsing input. The following formats are currently supported:
+
+| Format                | Example                  |
+| --------------------- | ------------------------ |
+| RGB (plain values)    | 255 255 255              |
+| RGB (8-bit channels)  | rgb(255, 255, 255)       |
+| RGB (float channels)  | rgb(1.0, 1.0, 1.0)       |
+| RGBa                  | rgba(255, 255, 255, 0.5) |
+| Hex                   | #ffee00                  |
+| Hex (short)           | #fe0                     |
+| Hex (plain value)     | fe0                      |
