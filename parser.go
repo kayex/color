@@ -2,7 +2,6 @@ package color
 
 import (
 	"fmt"
-	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -10,50 +9,47 @@ import (
 
 var patterns = []struct {
 	pattern *regexp.Regexp
-	parser  func(string) (Color, error)
+	parser  func(string) (Format, error)
 }{
 	{
-		// Matches six digit hex colors (#FFFFFF)
-		pattern: regexp.MustCompile(`^#?([ABCDEFabcdef0-9]{2}){3}$`),
+		// Matches three and six digit hex colors (#FFF, #FFFFFF)
+		pattern: regexp.MustCompile(`^#?([ABCDEFabcdef0-9]{3}|[ABCDEFabcdef0-9]{6})$`),
 		parser:  parseHex,
 	},
 	{
-		// Matches three digit hex colors (#FFF)
-		pattern: regexp.MustCompile(`^#?([ABCDEFabcdef0-9]){3}$`),
-		parser:  parseHex,
-	},
-	{
-		// Matches RGB colors with int channel values (rgb(255, 255, 255))
-		pattern: regexp.MustCompile(`^(rgb\()?(?:[0-9]{1,3}(?:,|, )?\)?){3}$`),
+		// Matches RGB colors with int channel values (rgb(255, 255, 255)) including
+		// RGBA strings with a float alpha-channel value (rgba(255, 255, 255, 0.5).
+		pattern: regexp.MustCompile(`^(?:rgba?\()?(?:[0-9]{1,3}(?:,|, | )?){3}(?:[01]\.[0-9]+)?\)?$`),
 		parser:  parseRGBint,
 	},
 	{
-		// Matches RGB colors with float channel values (rgb(1.0, 1.0, 1.0))
-		pattern: regexp.MustCompile(`^(?:rgb\()?(?:(?:[01])\.[0-9](?:,|, )?){3}\)?$`),
+		// Matches RGB colors with float channel values (rgb(1.0, 1.0, 1.0)) including
+		// RGBA strings with a an alpha-channel value (rgba(1.0, 1.0, 1.0, 0.5).
+		pattern: regexp.MustCompile(`^(?:rgba?\()?(?:(?:[01])\.[0-9](?:,|, )?){3,4}\)?$`),
 		parser:  parseRGBfloat,
 	},
 }
 
-func Parse(s string) (Color, error) {
+func Parse(s string) (Format, error) {
 	for _, p := range patterns {
 		match := p.pattern.MatchString(s)
 		if match {
 			c, err := p.parser(s)
 			if err != nil {
-				return 0, err
+				return nil, err
 			}
 
 			return c, nil
 		}
 	}
 
-	return 0, fmt.Errorf("unknown color format: %s", s)
+	return nil, fmt.Errorf("unknown color format: %s", s)
 }
 
-func parseHex(s string) (Color, error) {
+func parseHex(s string) (Format, error) {
 	h := strings.TrimPrefix(s, "#")
 	if !validHex(h) {
-		return 0, fmt.Errorf("invalid hex value %q", h)
+		return nil, fmt.Errorf("invalid hex value %q", h)
 	}
 
 	// Here it is safe to take the byte length of the string, since no characters that are valid hexadecimal values
@@ -64,81 +60,79 @@ func parseHex(s string) (Color, error) {
 	case 3:
 		h = extendShortHex(h)
 	default:
-		return 0, fmt.Errorf("invalid hex format %q, hex colors should be either 3 or 6 characters long", h)
+		return nil, fmt.Errorf("invalid hex format %q, hex colors should be either 3 or 6 characters long", h)
 	}
 
 	v, err := strconv.ParseInt(h, 16, 32)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	c := Color(v)
 
 	if c < CMin || c > CMax {
-		return 0, fmt.Errorf("invalid color value %q, values should be between %x and %x", h, CMin, CMax)
+		return nil, fmt.Errorf("invalid color value %q, values should be between %x and %x", h, CMin, CMax)
 	}
 
-	return c, nil
+	return HexColor(h), nil
 }
 
-func parseRGBint(s string) (Color, error) {
+func parseRGBint(s string) (Format, error) {
 	rgbValues, err := rgbValues(s)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	var channels []uint8
-	for _, v := range rgbValues {
-		c, err := strconv.Atoi(v)
-		if err != nil || c > 255 {
-			return 0, fmt.Errorf("invalid RGB color channel value: %s", s)
+	var c []uint8
+	for i := 0; i < 3; i++ {
+		v, err := strconv.Atoi(rgbValues[i])
+		if err != nil || v > 0xff {
+			return nil, fmt.Errorf("invalid RGB channel value %q in color string: %s", strconv.Itoa(v), s)
 		}
 
-		channels = append(channels, uint8(c))
+		c = append(c, uint8(v))
 	}
 
-	return RGB(channels[0], channels[1], channels[2]), nil
+	return RGBInt{c[0], c[1], c[2]}, nil
 }
 
-func parseRGBfloat(s string) (Color, error) {
+func parseRGBfloat(s string) (Format, error) {
 	rgbValues, err := rgbValues(s)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	var channels []uint8
-	for _, v := range rgbValues {
-		c, err := strconv.ParseFloat(v, 64)
-		if err != nil || c > 1.0 {
-			return 0, fmt.Errorf("invalid RGB color channel value: %s", s)
+	var c []float32
+	for i := 0; i < 3; i++ {
+		v, err := strconv.ParseFloat(rgbValues[i], 64)
+		if err != nil || v > 1.0 {
+			return nil, fmt.Errorf("invalid RGB channel value %q in color string %s", FormatRGBChannelFloat(v), s)
 		}
 
-		var ci uint8
-		if c == 0.0 {
-			ci = 0
-		} else {
-			ci = uint8(math.Round(255 / c))
-		}
-
-		channels = append(channels, ci)
+		c = append(c, float32(v))
 	}
 
-	return RGB(channels[0], channels[1], channels[2]), nil
+	return RGBFloat{c[0], c[1], c[2]}, nil
 }
 
 func rgbValues(s string) ([]string, error) {
+	original := copyString(s)
 	// Remove "rgb()"
-	if strings.HasPrefix(s, "rgb(") && strings.HasSuffix(s, ")") {
-		s = strings.TrimLeft(s, "rgb(")
+	if (strings.HasPrefix(s, "rgb(") || strings.HasPrefix(s, "rgba(")) && strings.HasSuffix(s, ")") {
+		s = strings.TrimLeft(s, "rgba(")
 		s = strings.TrimRight(s, ")")
 	}
 
-	// Remove spaces
-	s = strings.Replace(s, " ", "", -1)
+	var channels []string
 
-	channels := strings.Split(s, ",")
+	if strings.Index(s, ",") != -1 {
+		s = strings.Replace(s, " ", "", -1)
+		channels = strings.Split(s, ",")
+	} else {
+		channels = strings.Split(s, " ")
+	}
 
-	if len(channels) != 3 {
-		return nil, fmt.Errorf("invalid RGB color string: %s", s)
+	if len(channels) < 3 || len(channels) > 4 {
+		return nil, fmt.Errorf("invalid RGB color string: %s", original)
 	}
 
 	return channels, nil
@@ -151,4 +145,8 @@ func validHex(hex string) bool {
 	valid := invalidChar == -1
 
 	return valid
+}
+
+func copyString(a string) string {
+	return (a + " ")[:len(a)]
 }

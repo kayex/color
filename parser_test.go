@@ -11,11 +11,21 @@ func TestParse(t *testing.T) {
 		{"rgb(0,0,0)", RGB(0, 0, 0), false},
 		{"rgb(255,255,255)", RGB(255, 255, 255), false},
 		{"rgb(255, 255, 255)", RGB(255, 255, 255), false},
+		{"rgb(255, 255, 255, 0.5)", RGB(255, 255, 255), false},
+		{"rgb(255,255,255,0.5)", RGB(255, 255, 255), false},
 		{"rgb(1.0,1.0,1.0)", RGB(255, 255, 255), false},
 		{"rgb(1.0, 1.0, 1.0)", RGB(255, 255, 255), false},
+		{"rgba(1.0, 1.0, 1.0, 0.5)", RGB(255, 255, 255), false},
+		{"rgba(0.0, 0.0, 0.0, 0.0)", RGB(0, 0, 0), false},
+		{"rgba(1.0, 1.0, 1.0, 1.0)", RGB(255, 255, 255), false},
+		{"rgba(1.0,1.0,1.0,0.5)", RGB(255, 255, 255), false},
+		{"rgba(1.0,1.0,1.0)", RGB(255, 255, 255), false},
 		{"0,0,0", RGB(0, 0, 0), false},
 		{"174,235,255", RGB(174, 235, 255), false},
 		{"0, 0, 0", RGB(0, 0, 0), false},
+		{"0 0 0", RGB(0, 0, 0), false},
+		{"255 255 255", RGB(255, 255, 255), false},
+		{"255 255 255 0.5", RGB(255, 255, 255), false},
 
 		{"#000", Color(0x000), false},
 		{"#FFF", Color(0xffffff), false},
@@ -33,16 +43,25 @@ func TestParse(t *testing.T) {
 	for _, c := range cases {
 		act, err := Parse(c.color)
 
-		if err != nil && !c.err {
-			t.Errorf("Expected Parse(%q) to be %v, got error: %v", c.color, c.exp, err)
-			continue
-		} else if err == nil && c.err {
-			t.Errorf("Expected Parse(%q) to return error", c.color)
-			continue
-		}
+		if err != nil {
+			if !c.err {
+				t.Errorf("Expected Parse(%q) to be %v, got error: %v", c.color, c.exp, err)
+				continue
+			}
+		} else {
+			if c.err {
+				t.Errorf("Expected Parse(%q) to return error", c.color)
+				continue
+			}
 
-		if act != c.exp {
-			t.Errorf("Expected Parse(%q) to return %v, got %v", c.color, c.exp, act)
+			if act == nil {
+				t.Errorf("Expected Parse(%q) to be %v, got nil", c.color, c.exp)
+				continue
+			}
+
+			if act.Color() != c.exp {
+				t.Errorf("Expected Parse(%q) to return %v, got %v", c.color, c.exp, act)
+			}
 		}
 	}
 }

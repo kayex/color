@@ -29,6 +29,11 @@ func (c Color) Channels() (uint8, uint8, uint8) {
 	return r, g, b
 }
 
+type Format interface {
+	Color() Color
+	String() string
+}
+
 // HexColor is a Color represented as a hexadecimal string.
 type HexColor string
 
@@ -53,16 +58,26 @@ func (h HexColor) String() string {
 
 func (c Color) Hex() HexColor {
 	rgb := c.RGBInt()
-	h := fmt.Sprintf("%02x%02x%02x", rgb.r, rgb.g, rgb.b)
+	h := fmt.Sprintf("%02x%02x%02x", rgb.R, rgb.G, rgb.B)
 
 	return HexColor(h)
 }
 
+func (h HexColor) Color() Color {
+	v, err := strconv.ParseInt(string(h), 16, 32)
+	if err != nil {
+		panic(err)
+	}
+
+	c := Color(v)
+	return c
+}
+
 // RGBInt is a color represented by three 8 bit channel values.
 type RGBInt struct {
-	r uint8
-	g uint8
-	b uint8
+	R uint8
+	G uint8
+	B uint8
 }
 
 func RGB(r, g, b uint8) Color {
@@ -77,81 +92,87 @@ func (c Color) RGBInt() RGBInt {
 	return RGBInt{r, g, b}
 }
 
-func (rgb *RGBInt) Color() Color {
-	c := RGB(rgb.r, rgb.g, rgb.b)
+func (rgb RGBInt) Color() Color {
+	c := RGB(rgb.R, rgb.G, rgb.B)
 
 	return c
 }
 
 func (rgb RGBInt) String() string {
-	return fmt.Sprintf("rgb(%d, %d, %d)", rgb.r, rgb.g, rgb.b)
+	return fmt.Sprintf("rgb(%d, %d, %d)", rgb.R, rgb.G, rgb.B)
 }
 
 // RGBFloat is a color represented by three float channel values between 0.0 and 1.0.
 type RGBFloat struct {
-	r float32
-	g float32
-	b float32
+	R float32
+	G float32
+	B float32
 }
 
 func (c Color) RGBFloat() RGBFloat {
 	rgb := c.RGBInt()
-	r := float32(rgb.r) / 0xff
-	g := float32(rgb.g) / 0xff
-	b := float32(rgb.b) / 0xff
+	r := float32(rgb.R) / 0xff
+	g := float32(rgb.G) / 0xff
+	b := float32(rgb.B) / 0xff
 
 	return RGBFloat{r, g, b}
 }
 
-func (rgb *RGBFloat) Color() Color {
-	r := toIntChannelVal(rgb.r)
-	g := toIntChannelVal(rgb.g)
-	b := toIntChannelVal(rgb.b)
+func (rgb RGBFloat) Color() Color {
+	r := IntChannelValue(float64(rgb.R))
+	g := IntChannelValue(float64(rgb.G))
+	b := IntChannelValue(float64(rgb.B))
 
 	return RGB(r, g, b)
 }
 
-func (rgb *RGBFloat) Equals(o *RGBFloat) bool {
-	return colorEqual(rgb.r, o.r) &&
-		colorEqual(rgb.g, o.g) &&
-		colorEqual(rgb.b, o.b)
+func (rgb RGBFloat) Equals(o *RGBFloat) bool {
+	return channelEqual(rgb.R, o.R) &&
+		channelEqual(rgb.G, o.G) &&
+		channelEqual(rgb.B, o.B)
 }
 
 func (rgb RGBFloat) String() string {
-	r := formatRGBChannelFloat(float64(rgb.r))
-	g := formatRGBChannelFloat(float64(rgb.g))
-	b := formatRGBChannelFloat(float64(rgb.b))
+	r, g, b := rgb.Formatted()
 
 	return fmt.Sprintf("rgb(%v, %v, %v)", r, g, b)
 }
 
-func formatRGBChannelFloat(i float64) string {
-	// First see if we have 2 or fewer significant decimal places,
-	// and if so, return the number with up to 2 trailing 0s.
+func (rgb RGBFloat) Formatted() (string, string, string) {
+	r := FormatRGBChannelFloat(float64(rgb.R))
+	g := FormatRGBChannelFloat(float64(rgb.G))
+	b := FormatRGBChannelFloat(float64(rgb.B))
+
+	return r, g, b
+}
+
+// FormatRGBChannelFloat formats a single float channel value for display purposes.
+func FormatRGBChannelFloat(i float64) string {
+	// If decimals are not significant, truncate to one decimal point.
 	if i*10 == math.Floor(i*10) {
 		return strconv.FormatFloat(i, 'f', 1, 32)
 	}
-	// Otherwise, just format normally, using the minimum number of
-	// necessary digits.
+
+	// Otherwise, use at most two decimal points.
 	return strconv.FormatFloat(i, 'f', 2, 32)
 }
 
-// colorEqual compares two sRGB float color values.
-func colorEqual(a, b float32) bool {
-	// p is the size of each distinct color value in 24 bit sRGB.
+// channelEqual compares two sRGB float color channels.
+func channelEqual(a, b float32) bool {
+	// p is the size of each distinct channel value in 24 bit sRGB.
 	const p = 1.0 / 0xff
 	eq := (a-b) < p && (b-a) < p
 
 	return eq
 }
 
-func toIntChannelVal(f float32) uint8 {
+func IntChannelValue(f float64) uint8 {
 	var v uint8
 
-	if v == 0.0 {
+	if f == 0.0 {
 		v = 0
 	} else {
-		v = uint8(math.Round(255 / float64(f)))
+		v = uint8(math.Round(0xff / f))
 	}
 
 	return v

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/atotto/clipboard"
 	"github.com/kayex/color"
-	"log"
 	"os"
 	"strconv"
 )
@@ -14,7 +13,6 @@ func printFormats(formats []colorFormat) {
 	for _, format := range formats {
 		fmt.Printf(" [%d] %s\t%v\n", format.key, format.name, format.value)
 	}
-	fmt.Println()
 }
 
 type colorFormat struct {
@@ -23,36 +21,65 @@ type colorFormat struct {
 	value string
 }
 
-func createFormats(c color.Color) []colorFormat {
+func createFormats(f color.Format) []colorFormat {
+	c := f.Color()
+	ri := c.RGBInt()
+
 	formats := []colorFormat{
 		{1, "sRGB", strconv.Itoa(int(c))},
 		{2, "Hex", c.Hex().String()},
-		{3, "RGB", c.RGBInt().String()},
-		{4, "RGB", c.RGBFloat().String()},
+		{3, "RGB", fmt.Sprintf("%v %v %v", ri.R, ri.G, ri.B)},
+		{4, "RGB", c.RGBInt().String()},
 	}
 
 	return formats
 }
 
 func main() {
+	scanner := bufio.NewScanner(os.Stdin)
 	args := os.Args[1:]
+	var format color.Format
+	var err error
 
-	if len(args) < 1 {
-		fmt.Println("Usage: color [value]")
-		os.Exit(1)
-	}
-	input := args[0]
+	if len(args) >= 1 {
+		input := args[0]
+		format, err = color.Parse(input)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	} else {
+		for scanner.Scan() {
+			input := scanner.Text()
 
-	c, err := color.Parse(input)
-	if err != nil {
-		log.Fatal(err)
+			if input == "" {
+				continue
+			}
+
+			format, err = color.Parse(input)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				break
+			}
+		}
+
+		if err := scanner.Err(); err != nil {
+			fmt.Fprintln(os.Stderr, "error:", err)
+			os.Exit(1)
+		}
 	}
-	formats := createFormats(c)
+
+	formats := createFormats(format)
 
 	fmt.Println()
+	fmt.Printf(" Input (%s)\t%v", getFormatName(format), format.String())
+	fmt.Println()
+	fmt.Println()
 	printFormats(formats)
+	fmt.Println()
+	fmt.Printf("Copy> ")
 
-	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		choice := scanner.Text()
 
@@ -64,7 +91,7 @@ func main() {
 		// Copy format value
 		v := formats[i-1].value
 		clipboard.WriteAll(v)
-		fmt.Printf("%v copied to clipboard.\n", formats[i-1].name)
+		fmt.Printf("%v value copied to clipboard.\n", formats[i-1].name)
 		break
 	}
 
@@ -72,4 +99,15 @@ func main() {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
+
+func getFormatName(f color.Format) string {
+	switch f.(type) {
+	case color.HexColor:
+		return "hex"
+	case color.RGBInt, color.RGBFloat:
+		return "RGB"
+	}
+
+	return ""
 }
