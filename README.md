@@ -1,7 +1,7 @@
 # color
 A color format conversion tool. Supports copying converted values to clipboard.
 
-![Color screenshot](/screen.png?raw=true "Color")
+![Color screenshot](/screen.png?raw=true&cache=2 "Color")
 
 # Installation
 ```bash
@@ -9,8 +9,9 @@ go get github.com/kayex/color/cmd/color
 ```
 
 # Usage
+You can either pass the color string as the sole argument to `color`, or run it without any arguments to enter interactive mode.
 
-### Color as program argument
+### Passing color string as argument
 ```
 $ color "rgb(232, 112, 96)"
 
@@ -24,7 +25,7 @@ $ color "rgb(232, 112, 96)"
 Copy> 
 ```
 
-### Interactive mode
+### Entering color string in interactive mode
 ```
 $ color
 > #abc
