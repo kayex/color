@@ -35,9 +35,6 @@ func TestParse(t *testing.T) {
 		{"#aabbcc", Color(0xaabbcc), false},
 		{"#abc", Color(0xaabbcc), false},
 		{"#def", Color(0xddeeff), false},
-		{"def", Color(0xddeeff), false},
-		{"#1000000", 0, true},
-		{"#aaff", 0, true},
 	}
 
 	for _, c := range cases {
@@ -60,7 +57,7 @@ func TestParse(t *testing.T) {
 			}
 
 			if act.Color() != c.exp {
-				t.Errorf("Expected Parse(%q) to return %v, got %v", c.color, c.exp, act)
+				t.Errorf("Expected Parse(%q) to return %v, got %v", c.color, c.exp, act.Color())
 			}
 		}
 	}
