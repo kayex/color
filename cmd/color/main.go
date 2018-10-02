@@ -87,7 +87,7 @@ func main() {
 
 		i, err := strconv.Atoi(choice)
 		if err != nil || i > len(formats) {
-			continue
+			break
 		}
 
 		// Copy format value
