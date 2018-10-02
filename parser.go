@@ -12,29 +12,29 @@ var patterns = []struct {
 	parser  func(string) (Format, error)
 }{
 	{
-		// Matches three and six digit hex colors (#FFF, #FFFFFF)
-		pattern: regexp.MustCompile(`^#?([ABCDEFabcdef0-9]{3}|[ABCDEFabcdef0-9]{6})$`),
-		parser:  parseHex,
-	},
-	{
 		// Matches RGB colors with int channel values (rgb(255, 255, 255)) including
 		// RGBA strings with a float alpha-channel value (rgba(255, 255, 255, 0.5).
-		pattern: regexp.MustCompile(`^(?:rgba?\()?(?:[0-9]{1,3}(?:,|, | )?){3}(?:[01]\.[0-9]+)?\)?$`),
+		pattern: regexp.MustCompile(`(?:rgba?\()?(?:[0-9]{1,3}(?:,|, | )?){3}(?:[01]\.[0-9]+)?\)?`),
 		parser:  parseRGBint,
 	},
 	{
 		// Matches RGB colors with float channel values (rgb(1.0, 1.0, 1.0)) including
 		// RGBA strings with a an alpha-channel value (rgba(1.0, 1.0, 1.0, 0.5).
-		pattern: regexp.MustCompile(`^(?:rgba?\()?(?:(?:[01])\.[0-9](?:,|, )?){3,4}\)?$`),
+		pattern: regexp.MustCompile(`(?:rgba?\()?(?:(?:[01])\.[0-9](?:,|, )?){3,4}\)?`),
 		parser:  parseRGBfloat,
+	},
+	{
+		// Matches three and six digit hex colors (#FFF, #FFFFFF)
+		pattern: regexp.MustCompile(`#?([ABCDEFabcdef0-9]{3}|[ABCDEFabcdef0-9]{6})`),
+		parser:  parseHex,
 	},
 }
 
 func Parse(s string) (Format, error) {
 	for _, p := range patterns {
-		match := p.pattern.MatchString(s)
-		if match {
-			c, err := p.parser(s)
+		match := p.pattern.FindString(s)
+		if match != "" {
+			c, err := p.parser(match)
 			if err != nil {
 				return nil, err
 			}
