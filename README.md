@@ -1,2 +1,2 @@
 # color
-A color code conversion tool.
+A color format conversion tool.
