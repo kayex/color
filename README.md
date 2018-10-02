@@ -1,7 +1,9 @@
 # color 🎨
 A CSS color format conversion tool.
 
-![Color screenshot](/screen.png?raw=true&cache=2 "Color")
+<p align="center">
+ <img src="/screen.png?raw=true" alt="Color screenshot">
+</p>
 
 # Installation
 ```bash
