@@ -1,10 +1,9 @@
 package color
 
 import (
-	"bytes"
 	"fmt"
+	"math"
 	"strconv"
-	"strings"
 )
 
 // Color is a 24 bit sRGB web color.
@@ -22,59 +21,30 @@ const (
 	OffsetB = 0x00
 )
 
-func (c Color) String() string {
-	return c.Hex().String()
+func (c Color) Channels() (uint8, uint8, uint8) {
+	r := uint8(c>>OffsetR) & 0xff
+	g := uint8(c>>OffsetG) & 0xff
+	b := uint8(c>>OffsetB) & 0xff
+
+	return r, g, b
 }
 
 // HexColor is a Color represented as a hexadecimal string.
 type HexColor string
 
-func Hex(s string) (Color, error) {
-	h := strings.TrimPrefix(s, "#")
-	if !validHex(h) {
-		return 0, fmt.Errorf("invalid hex value %q", h)
-	}
-
-	// Here, we can safely assume that v is in the ASCII range (since it
-	// passed validHex()) and index byte-wise.
-	hl := len(h)
-	switch hl {
-	case 6:
-	case 3:
-		h = convertShortHex(h)
-	default:
-		return 0, fmt.Errorf("invalid hex format %q, hex colors should be either 3 or 6 characters long", h)
-	}
-
-	v, err := strconv.ParseInt(h, 16, 32)
-	if err != nil {
-		return 0, err
-	}
-	c := Color(v)
-
-	if c < CMin || c > CMax {
-		return 0, fmt.Errorf("invalid color value %q, values should be between %x and %x", h, CMin, CMax)
-	}
-
-	return c, nil
-}
-
-// convertShortHex converts color values on the shorthand hexadecimal format
+// extendShortHex converts color values on the shorthand hexadecimal format
 // to the full 6 character format.
 //
 // For example: fff -> ffffff
 //              abc -> aabbcc
-func convertShortHex(hex string) string {
-	var b bytes.Buffer
+func extendShortHex(hex string) string {
+	var l [6]byte
 
-	b.WriteByte(hex[0])
-	b.WriteByte(hex[0])
-	b.WriteByte(hex[1])
-	b.WriteByte(hex[1])
-	b.WriteByte(hex[2])
-	b.WriteByte(hex[2])
+	for i := 0; i < 6; i++ {
+		l[i] = hex[i/2]
+	}
 
-	return b.String()
+	return string(l[:])
 }
 
 func (h HexColor) String() string {
@@ -83,28 +53,32 @@ func (h HexColor) String() string {
 
 func (c Color) Hex() HexColor {
 	rgb := c.RGBInt()
-	h := fmt.Sprintf("%02x%02x%02x", rgb.r, rgb.g, rgb.g)
+	h := fmt.Sprintf("%02x%02x%02x", rgb.r, rgb.g, rgb.b)
 
 	return HexColor(h)
 }
 
-// RGBInt is a color represented by three 8 bit channels; red, green, and blue.
+// RGBInt is a color represented by three 8 bit channel values.
 type RGBInt struct {
 	r uint8
 	g uint8
 	b uint8
 }
 
-func (c Color) RGBInt() RGBInt {
-	r := (c >> OffsetR) & 0xff
-	g := (c >> OffsetG) & 0xff
-	b := c & 0xff
+func RGB(r, g, b uint8) Color {
+	v := (uint(r) << OffsetR) | (uint(g) << OffsetG) | uint(b)<<OffsetB
 
-	return RGBInt{uint8(r), uint8(g), uint8(b)}
+	return Color(v)
+}
+
+func (c Color) RGBInt() RGBInt {
+	r, g, b := c.Channels()
+
+	return RGBInt{r, g, b}
 }
 
 func (rgb *RGBInt) Color() Color {
-	c := consolidate(rgb.r, rgb.g, rgb.b)
+	c := RGB(rgb.r, rgb.g, rgb.b)
 
 	return c
 }
@@ -113,6 +87,7 @@ func (rgb RGBInt) String() string {
 	return fmt.Sprintf("rgb(%d, %d, %d)", rgb.r, rgb.g, rgb.b)
 }
 
+// RGBFloat is a color represented by three float channel values between 0.0 and 1.0.
 type RGBFloat struct {
 	r float32
 	g float32
@@ -129,40 +104,55 @@ func (c Color) RGBFloat() RGBFloat {
 }
 
 func (rgb *RGBFloat) Color() Color {
-	c := consolidate(uint8(rgb.r), uint8(rgb.g), uint8(rgb.b))
+	r := toIntChannelVal(rgb.r)
+	g := toIntChannelVal(rgb.g)
+	b := toIntChannelVal(rgb.b)
 
-	return c
+	return RGB(r, g, b)
 }
 
 func (rgb *RGBFloat) Equals(o *RGBFloat) bool {
-	return colorChanEqual(rgb.r, o.r) &&
-		colorChanEqual(rgb.g, o.g) &&
-		colorChanEqual(rgb.b, o.b)
+	return colorEqual(rgb.r, o.r) &&
+		colorEqual(rgb.g, o.g) &&
+		colorEqual(rgb.b, o.b)
 }
 
 func (rgb RGBFloat) String() string {
-	return fmt.Sprintf("rgb(%0.2f, %0.2f, %0.2f)", rgb.r, rgb.g, rgb.b)
+	r := formatRGBChannelFloat(float64(rgb.r))
+	g := formatRGBChannelFloat(float64(rgb.g))
+	b := formatRGBChannelFloat(float64(rgb.b))
+
+	return fmt.Sprintf("rgb(%v, %v, %v)", r, g, b)
 }
 
-func consolidate(r, g, b uint8) Color {
-	v := (uint(r) << OffsetR) | (uint(g) << OffsetG) | uint(b)<<OffsetB
-
-	return Color(v)
+func formatRGBChannelFloat(i float64) string {
+	// First see if we have 2 or fewer significant decimal places,
+	// and if so, return the number with up to 2 trailing 0s.
+	if i*10 == math.Floor(i*10) {
+		return strconv.FormatFloat(i, 'f', 1, 32)
+	}
+	// Otherwise, just format normally, using the minimum number of
+	// necessary digits.
+	return strconv.FormatFloat(i, 'f', 2, 32)
 }
 
-func validHex(hex string) bool {
-	invalidChar := strings.IndexFunc(hex, func(r rune) bool {
-		return !('0' <= r && r <= 'f')
-	})
-
-	return invalidChar == -1
-}
-
-func colorChanEqual(a, b float32) bool {
+// colorEqual compares two sRGB float color values.
+func colorEqual(a, b float32) bool {
 	// p is the size of each distinct color value in 24 bit sRGB.
 	const p = 1.0 / 0xff
-
 	eq := (a-b) < p && (b-a) < p
 
 	return eq
+}
+
+func toIntChannelVal(f float32) uint8 {
+	var v uint8
+
+	if v == 0.0 {
+		v = 0
+	} else {
+		v = uint8(math.Round(255 / float64(f)))
+	}
+
+	return v
 }
