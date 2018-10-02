@@ -13,6 +13,17 @@ go get github.com/kayex/color/cmd/color
 # Usage
 The color value can either be passed as the sole argument to `color`, or entered interactively after running the program without any arguments.
 
+```
+$ color "#ffee00"
+```
+
+or
+
+```
+$ color
+> #ffee00
+```
+
 Color tries to be as accomodating as possible when parsing input. The following formats are currently supported:
 
 | Format                | Example                  |
