@@ -11,33 +11,16 @@ go get github.com/kayex/color/cmd/color
 ```
 
 # Usage
-You can either pass the color string as the sole argument to `color`, or run it without any arguments to enter interactive mode.
+The color value can either be passed as the sole argument to `color`, or entered interactively after running the program without any arguments.
 
-### Passing color string as argument
-```
-$ color "rgb(232, 112, 96)"
+Color tries to be as accomodating as possible in its input parsing. The following formats are known to work:
 
- Input (RGB)	rgb(232, 112, 96)
-
- [1] sRGB	15233120
- [2] Hex	#e87060
- [3] RGB	232 112 96
- [4] RGB	rgb(232, 112, 96)
- 
-Copy> 
-```
-
-### Entering color string in interactive mode
-```
-$ color
-> #abc
-
- Input (hex)	#aabbcc
-
- [1] sRGB	11189196
- [2] Hex	#aabbcc
- [3] RGB	170 187 204
- [4] RGB	rgb(170, 187, 204)
- 
-Copy>
-```
+| Format                | Example                  |
+| --------------------- | ------------------------ |
+| RGB (plain values)    | 255 255 255              |
+| RGB (8-bit channels)  | rgb(255, 255, 255)       |
+| RGB (float channels)  | rgb(1.0, 1.0, 1.0)       |
+| RGBa                  | rgba(255, 255, 255, 0.5) |
+| Hex                   | #ffee00                  |
+| Hex (short)           | #fe0                     |
+| Hex (plain value)     | fe0                      |
