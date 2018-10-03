@@ -35,4 +35,3 @@ Color tries to be as accomodating as possible when parsing input. The following 
 | RGBa                  | rgba(255, 255, 255, 0.5) |
 | Hex                   | #ffee00                  |
 | Hex (short)           | #fe0                     |
-| Hex (plain value)     | fe0                      |
