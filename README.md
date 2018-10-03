@@ -1,10 +1,10 @@
 # color 🎨
 
 <p align="center">
- <img src="/screen.png?raw=true" alt="Color screenshot">
+ A color conversion tool.
 </p>
 <p align="center">
- A color conversion tool.
+ <img src="/screen.png?raw=true" alt="Color screenshot">
 </p>
 
 # Installation
