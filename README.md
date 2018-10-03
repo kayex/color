@@ -28,7 +28,17 @@ $ color
 ```
 
 # Color formats
-Color tries to be as accomodating as possible when parsing input. All of the following examples are supported:
+```
+[x] RGB (8-bit channels)
+[x] RGB (float channels)
+[x] RGBA
+[x] Hex triplet
+[x] Hex triplet (short)
+[ ] HSL
+[ ] HSLA
+```
+
+Color tries to be as accomodating as possible when parsing input. All of the following examples work:
 ```
 255 255 255
 rgb 255 255 255
