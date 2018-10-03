@@ -1,3 +1,7 @@
+# Application
+color
+color-*
+
 # Binaries for programs and plugins
 *.exe
 *.dll
