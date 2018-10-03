@@ -94,6 +94,15 @@ func parseRGBint(s string) (Format, error) {
 		c = append(c, uint8(v))
 	}
 
+	if len(rgbValues) == 4 {
+		a, err := parseFloatChanVal(rgbValues[3])
+		if err != nil {
+			return nil, fmt.Errorf("could not decode RGBA alpha channel value: %v", err)
+		}
+
+		return RGBAInt{RGBInt{c[0], c[1], c[2]}, a}, nil
+	}
+
 	return RGBInt{c[0], c[1], c[2]}, nil
 }
 
@@ -104,13 +113,17 @@ func parseRGBfloat(s string) (Format, error) {
 	}
 
 	var c []float32
-	for i := 0; i < 3; i++ {
-		v, err := strconv.ParseFloat(rgbValues[i], 64)
-		if err != nil || v > 1.0 {
-			return nil, fmt.Errorf("invalid RGB channel value %q in color string %s", FormatRGBChannelFloat(v), s)
+	for _, cv := range rgbValues {
+		v, err := parseFloatChanVal(cv)
+		if err != nil {
+			return nil, err
 		}
 
-		c = append(c, float32(v))
+		c = append(c, v)
+	}
+
+	if len(c) == 4 {
+		return RGBAFloat{RGBFloat{c[0], c[1], c[2]}, c[3]}, nil
 	}
 
 	return RGBFloat{c[0], c[1], c[2]}, nil
@@ -147,6 +160,15 @@ func validHex(hex string) bool {
 	valid := invalidChar == -1
 
 	return valid
+}
+
+func parseFloatChanVal(s string) (float32, error) {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil || v > 1.0 {
+		return 0.0, fmt.Errorf("invalid channel value %q", FormatRGBChannelFloat(v))
+	}
+
+	return float32(v), nil
 }
 
 func copyString(a string) string {

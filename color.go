@@ -9,6 +9,11 @@ import (
 // Color is a 24 bit sRGB web color.
 type Color uint
 
+type AlphaColor struct {
+	Color
+	Alpha float32
+}
+
 // CMin is the lowest possible color value.
 const CMin Color = 0x0
 
@@ -102,6 +107,27 @@ func (rgb RGBInt) String() string {
 	return fmt.Sprintf("rgb(%d, %d, %d)", rgb.R, rgb.G, rgb.B)
 }
 
+type RGBAInt struct {
+	RGBInt
+	A float32
+}
+
+func RGBA(r, g, b uint8, a float32) AlphaColor {
+	v := (uint(r) << OffsetR) | (uint(g) << OffsetG) | uint(b)<<OffsetB
+
+	return AlphaColor{Color(v), a}
+}
+
+func (rgba RGBAInt) AlphaColor() AlphaColor {
+	c := AlphaColor{rgba.Color(), rgba.A}
+
+	return c
+}
+
+func (rgba RGBAInt) String() string {
+	return fmt.Sprintf("rgba(%d, %d, %d, %s)", rgba.R, rgba.G, rgba.B, FormatRGBChannelFloat(float64(rgba.A)))
+}
+
 // RGBFloat is a color represented by three float channel values between 0.0 and 1.0.
 type RGBFloat struct {
 	R float32
@@ -135,7 +161,7 @@ func (rgb RGBFloat) Equals(o *RGBFloat) bool {
 func (rgb RGBFloat) String() string {
 	r, g, b := rgb.Formatted()
 
-	return fmt.Sprintf("rgb(%v, %v, %v)", r, g, b)
+	return fmt.Sprintf("rgb(%s, %s, %s)", r, g, b)
 }
 
 func (rgb RGBFloat) Formatted() (string, string, string) {
@@ -144,6 +170,30 @@ func (rgb RGBFloat) Formatted() (string, string, string) {
 	b := FormatRGBChannelFloat(float64(rgb.B))
 
 	return r, g, b
+}
+
+type RGBAFloat struct {
+	RGBFloat
+	A float32
+}
+
+func (rgba RGBAFloat) AlphaColor() AlphaColor {
+	c := AlphaColor{rgba.Color(), rgba.A}
+
+	return c
+}
+
+func (rgba RGBAFloat) String() string {
+	r, g, b, a := rgba.Formatted()
+
+	return fmt.Sprintf("rgba(%s, %s, %s, %s)", r, g, b, a)
+}
+
+func (rgba RGBAFloat) Formatted() (string, string, string, string) {
+	r, g, b := rgba.RGBFloat.Formatted()
+	a := FormatRGBChannelFloat(float64(rgba.A))
+
+	return r, g, b, a
 }
 
 // FormatRGBChannelFloat formats a single float channel value for display purposes.
