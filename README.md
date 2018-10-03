@@ -9,6 +9,7 @@ A CSS color format conversion tool.
 ```bash
 go get github.com/kayex/color/cmd/color
 ```
+Precompiled binaries are available on the [releases page](https://github.com/kayex/color/releases).
 
 # Usage
 The color value can either be passed as the sole argument to `color`, or entered interactively after running the program without any arguments.
