@@ -28,8 +28,8 @@ func createFormats(f color.Format) []colorFormat {
 	formats := []colorFormat{
 		{1, "sRGB", strconv.Itoa(int(c))},
 		{2, "Hex", c.Hex().String()},
-		{3, "RGB", fmt.Sprintf("%v %v %v", ri.R, ri.G, ri.B)},
-		{4, "RGB", c.RGBInt().String()},
+		{3, "RGB 1", fmt.Sprintf("%v %v %v", ri.R, ri.G, ri.B)},
+		{4, "RGB 2", c.RGBInt().String()},
 	}
 
 	return formats
@@ -79,8 +79,9 @@ func main() {
 	fmt.Println()
 	fmt.Println()
 	printFormats(formats)
+	fmt.Println("  ↓")
 	fmt.Println()
-	fmt.Printf("Copy> ")
+	fmt.Printf("> ")
 
 	for scanner.Scan() {
 		choice := scanner.Text()
