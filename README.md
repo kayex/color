@@ -1,8 +1,10 @@
 # color 🎨
-A CSS color format conversion tool.
 
 <p align="center">
  <img src="/screen.png?raw=true" alt="Color screenshot">
+</p>
+<p align="center">
+ A color conversion tool.
 </p>
 
 # Installation
