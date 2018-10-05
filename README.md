@@ -1,4 +1,4 @@
-# color 🎨
+# color 🍭
 
 <p align="center">
  A color conversion tool.
@@ -14,18 +14,15 @@ go get github.com/kayex/color/cmd/color
 ... or download a pre-compiled binary from the [releases page](https://github.com/kayex/color/releases).
 
 # Usage
-The color value can either be passed as the sole argument to `color`, or entered interactively after running the program without any arguments.
+Enter any color value as the sole argument to `color`, or enter it interactively after running the program without any arguments.
+
+Most color strings need to be quoted when passed directly on the command line.
 
 ```
 $ color "#ffee00"
 ```
 
-or
-
-```
-$ color
-> #ffee00
-```
+Choose the output format by pressing <kbd>1</kbd> - <kbd>4</kbd> followed by <kbd>Enter</kbd> and the converted color value will be copied to the system clipboard.
 
 # Color formats
 ```
