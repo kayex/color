@@ -24,7 +24,7 @@ $ color "#ffee00"
 
 Choose the output format by pressing <kbd>1</kbd> - <kbd>4</kbd> followed by <kbd>Enter</kbd> and the converted color value will be copied to the system clipboard.
 
-# Color formats
+# Supported color formats
 ```
 [x] RGB (8-bit channels)
 [x] RGB (float channels)
@@ -35,7 +35,7 @@ Choose the output format by pressing <kbd>1</kbd> - <kbd>4</kbd> followed by <kb
 [ ] HSLA
 ```
 
-Color tries to be as accomodating as possible when parsing input. All of the following examples work:
+Color tries to be as accomodating as possible when parsing input. All of the following color strings are parsed correctly:
 ```
 255 255 255
 rgb 255 255 255
