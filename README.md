@@ -1,6 +1,8 @@
-# color 🎨
-A CSS color format conversion tool.
+# color 🍭
 
+<p align="center">
+ A color conversion tool.
+</p>
 <p align="center">
  <img src="/screen.png?raw=true" alt="Color screenshot">
 </p>
@@ -9,30 +11,40 @@ A CSS color format conversion tool.
 ```bash
 go get github.com/kayex/color/cmd/color
 ```
+... or download a pre-compiled binary from the [releases page](https://github.com/kayex/color/releases).
 
 # Usage
-The color value can either be passed as the sole argument to `color`, or entered interactively after running the program without any arguments.
+Enter any color value as the sole argument to `color`, or enter it interactively after running the program without any arguments.
+
+Most color strings need to be quoted when passed directly on the command line.
 
 ```
 $ color "#ffee00"
 ```
 
-or
+Choose the output format by pressing <kbd>1</kbd> - <kbd>4</kbd> followed by <kbd>Enter</kbd> and the converted color value will be copied to the system clipboard.
 
+# Supported color formats
 ```
-$ color
-> #ffee00
+[x] RGB (8-bit channels)
+[x] RGB (float channels)
+[x] RGBA
+[x] Hex triplet
+[x] Hex triplet (short)
+[ ] HSL
+[ ] HSLA
 ```
 
-# Color formats
-Color tries to be as accomodating as possible when parsing input. The following formats are currently supported:
+Color tries to be as accomodating as possible when parsing input. All of the following color strings are parsed correctly:
+```
+255 255 255
+rgb 255 255 255
+rgb(255,255,255)
+rgb(255, 255, 255)
+rgb(1.0, 1.0, 1.0)
+rgba(255, 255, 255, 0.5)
+rgba 0 0 0 0.5
 
-| Format                | Example                  |
-| --------------------- | ------------------------ |
-| RGB (plain values)    | 255 255 255              |
-| RGB (8-bit channels)  | rgb(255, 255, 255)       |
-| RGB (float channels)  | rgb(1.0, 1.0, 1.0)       |
-| RGBa                  | rgba(255, 255, 255, 0.5) |
-| Hex                   | #ffee00                  |
-| Hex (short)           | #fe0                     |
-| Hex (plain value)     | fe0                      |
+#f0a
+#ff00aa
+```
