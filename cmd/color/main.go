@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-// A conversionOption is used to show the user the available formats for conversion.
+// A conversionOption is used to show the user a format available for conversion to.
 type conversionOption struct {
 	c color.Format
 	// name is the conversionOption name (color format name) that should be displayed to the user.
@@ -45,14 +45,13 @@ func main() {
 		}
 	}
 
-	ops := options(format)
-
 	fmt.Println()
 	fmt.Printf(" Input (%s)\t%v", name(format), format.String())
 	fmt.Println()
 	fmt.Println()
+	ops := options(format)
 	for i, f := range ops {
-		_, err = fmt.Fprintf(writer, "[%d]  %s\n", i+1, f.String())
+		_, err = fmt.Fprintf(writer, " [%d] %s\n", i+1, f.String())
 		if err != nil {
 			fatalErr(errWriter, err)
 		}
