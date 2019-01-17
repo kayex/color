@@ -14,7 +14,7 @@ go get github.com/kayex/color/cmd/color
 ... or download a pre-compiled binary from the [releases page](https://github.com/kayex/color/releases).
 
 # Usage
-Enter any color value as the sole argument to `color`, or enter it interactively after running the program without any arguments.
+Enter any color value as the sole argument to `color`, or enter interactive mode by running the program without any arguments.
 
 Most color strings need to be quoted when passed directly on the command line.
 
