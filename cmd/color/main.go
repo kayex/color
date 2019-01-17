@@ -72,30 +72,6 @@ func representations(f color.Format) []colorFormat {
 	return formats
 }
 
-func clipboardPrompt(in io.Reader, out io.Writer, formats []colorFormat) error {
-	prompt(out)
-	scanner := bufio.NewScanner(in)
-	if scanner.Scan() {
-		i, err := strconv.Atoi(scanner.Text())
-
-		if err == nil && i <= len(formats) {
-			format := formats[i-1]
-			v := format.value
-
-			err = clipboard.WriteAll(v)
-			if err != nil {
-				fmt.Printf("Error copying to clipboard: %v\n", err)
-			} else {
-				fmt.Printf("%s value copied to clipboard.\n", format.name)
-			}
-		}
-	} else if err := scanner.Err(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func interactiveMode(in io.Reader, out io.Writer) (color.Format, error) {
 	var format color.Format
 	scanner := bufio.NewScanner(in)
@@ -126,9 +102,28 @@ Prompt:
 	return format, nil
 }
 
-func fatalErr(w io.Writer, e error) {
-	_, _ = fmt.Fprintln(w, "error:", e)
-	os.Exit(1)
+func clipboardPrompt(in io.Reader, out io.Writer, formats []colorFormat) error {
+	prompt(out)
+	scanner := bufio.NewScanner(in)
+	if scanner.Scan() {
+		i, err := strconv.Atoi(scanner.Text())
+
+		if err == nil && i <= len(formats) {
+			format := formats[i-1]
+			v := format.value
+
+			err = clipboard.WriteAll(v)
+			if err != nil {
+				fmt.Printf("Error copying to clipboard: %v\n", err)
+			} else {
+				fmt.Printf("%s value copied to clipboard.\n", format.name)
+			}
+		}
+	} else if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func prompt(w io.Writer) {
@@ -136,6 +131,11 @@ func prompt(w io.Writer) {
 	if err != nil {
 		fatalErr(w, err)
 	}
+}
+
+func fatalErr(w io.Writer, e error) {
+	_, _ = fmt.Fprintln(w, "error:", e)
+	os.Exit(1)
 }
 
 func name(f color.Format) string {
