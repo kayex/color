@@ -9,6 +9,7 @@ import (
 // Color is a 24 bit sRGB web color.
 type Color uint
 
+// AlphaColor is a color with a 32 bit alpha channel.
 type AlphaColor struct {
 	Color
 	Alpha float32
