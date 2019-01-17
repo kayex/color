@@ -22,7 +22,7 @@ Most color strings need to be quoted when passed directly on the command line.
 $ color "#ffee00"
 ```
 
-Choose the output format by pressing <kbd>1</kbd> - <kbd>4</kbd> followed by <kbd>Enter</kbd> and the converted color value will be copied to the system clipboard.
+Choose an output format by pressing <kbd>1</kbd> - <kbd>4</kbd> followed by <kbd>Enter</kbd> and the converted color value will be copied to the system clipboard.
 
 # Supported color formats
 ```
