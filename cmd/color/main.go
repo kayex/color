@@ -31,8 +31,7 @@ func main() {
 	var err error
 
 	if len(args) >= 1 {
-		input := args[0]
-		format, err = color.Parse(input)
+		format, err = color.Parse(args[0])
 		if err != nil {
 			fatalErr(writer, err)
 		}
