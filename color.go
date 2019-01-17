@@ -9,6 +9,14 @@ import (
 // Color is a 24 bit sRGB web color.
 type Color uint
 
+func (c Color) Color() Color {
+	return c
+}
+
+func (c Color) String() string {
+	return fmt.Sprintf("sRGB(%d)", c)
+}
+
 // AlphaColor is a color with a 32 bit alpha channel.
 type AlphaColor struct {
 	Color

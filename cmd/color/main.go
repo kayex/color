@@ -11,14 +11,17 @@ import (
 	"strconv"
 )
 
-type colorFormat struct {
-	key   int
-	name  string
+// A conversionOption is used to show the user the available formats for conversion.
+type conversionOption struct {
+	c color.Format
+	// name is the conversionOption name (color format name) that should be displayed to the user.
+	name string
+	// value is the converted value in a human-readable format.
 	value string
 }
 
-func (f *colorFormat) String() string {
-	return fmt.Sprintf("[%d] %s\t%v", f.key, f.name, f.value)
+func (f *conversionOption) String() string {
+	return fmt.Sprintf("%s\t%v", f.name, f.value)
 }
 
 func main() {
@@ -42,34 +45,36 @@ func main() {
 		}
 	}
 
-	converted := representations(format)
+	ops := options(format)
 
 	fmt.Println()
 	fmt.Printf(" Input (%s)\t%v", name(format), format.String())
 	fmt.Println()
 	fmt.Println()
-	for _, f := range converted {
-		_, err = fmt.Fprintf(writer, " %s\n", f.String())
+	for i, f := range ops {
+		_, err = fmt.Fprintf(writer, "[%d]  %s\n", i+1, f.String())
 		if err != nil {
 			fatalErr(errWriter, err)
 		}
 	}
 	fmt.Println()
 
-	_ = clipboardPrompt(reader, writer, converted)
+	_ = clipboardPrompt(reader, writer, ops)
 }
 
-func representations(f color.Format) []colorFormat {
+func options(f color.Format) []conversionOption {
 	c := f.Color()
+	hex := c.Hex()
 	rgb := c.RGBInt()
-	formats := []colorFormat{
-		{1, "sRGB", strconv.Itoa(int(c))},
-		{2, "Hex", c.Hex().String()},
-		{3, "RGB", fmt.Sprintf("%v %v %v", rgb.R, rgb.G, rgb.B)},
-		{4, "RGB", c.RGBInt().String()},
+
+	options := []conversionOption{
+		{c, "sRGB", strconv.Itoa(int(c))},
+		{hex, "Hex", hex.String()},
+		{rgb, "RGB", fmt.Sprintf("%v %v %v", rgb.R, rgb.G, rgb.B)},
+		{rgb, "RGB", rgb.String()},
 	}
 
-	return formats
+	return options
 }
 
 func interactiveMode(in io.Reader, out io.Writer) (color.Format, error) {
@@ -102,7 +107,7 @@ Prompt:
 	return format, nil
 }
 
-func clipboardPrompt(in io.Reader, out io.Writer, formats []colorFormat) error {
+func clipboardPrompt(in io.Reader, out io.Writer, formats []conversionOption) error {
 	prompt(out)
 	scanner := bufio.NewScanner(in)
 	if scanner.Scan() {
