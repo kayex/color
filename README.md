@@ -28,7 +28,7 @@ Choose an output format by pressing <kbd>1</kbd> - <kbd>4</kbd> followed by <kbd
 ```
 [x] RGB (8-bit channels)
 [x] RGB (float channels)
-[x] RGBA
+[/] RGBA
 [x] Hex triplet
 [x] Hex triplet (short)
 [ ] HSL
